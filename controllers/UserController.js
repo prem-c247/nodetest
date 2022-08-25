@@ -1,4 +1,5 @@
 "use strict";
+const { UserModel } = require("../models");
 
 /**
  * Get all record
@@ -7,11 +8,12 @@
  */
 const index = async (req, res, next) => {
   try {
+    var userData = await UserModel.find();
     // next() or
     return res.status(200).json({
       success: true,
       message: "Data fetched successfully.",
-      data: []
+      data: userData
     });
   } catch (error) {
     return res.status(500).json({
@@ -29,11 +31,20 @@ const index = async (req, res, next) => {
  */
 const store = async (req, res, next) => {
   try {
+    const {firstName, lastName, email, password, mobileNumber, status  } = req.body;
+    var userData = await UserModel.create({
+      firstName,
+      lastName,
+      email,
+      password,
+      mobileNumber,
+      status
+    });
     // next() or
     return res.status(200).json({
       success: true,
       message: "Data saved successfully.",
-      data: []
+      data: userData
     });
   } catch (error) {
     return res.status(500).json({
