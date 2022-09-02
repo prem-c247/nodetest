@@ -1,6 +1,5 @@
 
 const ageVerification = function(req, res, next){
-    console.log(req.body.age);
     age = req.body.age;
     if(age>=18){
         return next();

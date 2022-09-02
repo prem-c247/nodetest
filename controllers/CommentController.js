@@ -1,5 +1,5 @@
 "use strict";
-const {PostModel,CommentModel} = require('../models');
+const { CommentModel,PostModel } = require("../models");
 /**
  * Get all record
  * @param { req, res }
@@ -7,14 +7,12 @@ const {PostModel,CommentModel} = require('../models');
  */
 const index = async (req, res, next) => {
   try {
-   
-    // next() or
-    var post = await PostModel.find().populate('comment','_id comment');
-    // return post;
+    // Fetching all comments with with its post
+    var commentData = await CommentModel.find().populate('post','_id title description status image createdAt updatedAt');
     return res.status(200).json({
       success: true,
       message: "Data fetched successfully.",
-      data:post
+      data: commentData
     });
   } catch (error) {
     return res.status(500).json({
@@ -33,17 +31,16 @@ const index = async (req, res, next) => {
 const store = async (req, res, next) => {
   try {
     // next() or
-    const {title, description, image, status} = req.body;
-    var createPost = await PostModel.create({
-      title,
-      description,
-      image,
-      status,
+    const {comment, post} = req.body;
+    var createComment = await CommentModel.create({
+      comment,
+      post,
     });
+    await PostModel.updateOne({_id: post}, {$push: {comment: createComment}});
     return res.status(200).json({
       success: true,
       message: "Data saved successfully.",
-      data: createPost
+      data: createComment
     });
   } catch (error) {
     return res.status(500).json({
@@ -62,13 +59,11 @@ const store = async (req, res, next) => {
  */
  const details = async(req, res, next) => {
    try{
-    if(req.params.id){
-      var postDetails = await PostModel.findOne({_id:req.params.id}).populate('comment');
-    }
+    // next() or
     return res.status(200).json({
-      success: true,
+      success: true,    
       message: "Details fatched successfully.",
-      data: postDetails
+      data: {}
     });
    }
    catch (error) {
@@ -89,10 +84,16 @@ const store = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     // next() or
+    const comment  = req.body.comment;
+    if(req.params.id){
+      var commentUpdate = await CommentModel.findOneAndUpdate(
+        {_id:req.params.id},{comment:comment}
+      );
+    }
     return res.status(200).json({
       success: true,
       message: "Data updated successfully.",
-      data: []
+      data: commentUpdate
     });
   } catch (error) {
     return res.status(500).json({
@@ -112,14 +113,14 @@ const destroy = async (req, res, next) => {
   try {
     // next() or
     if(req.params.id){
-      var postId = req.params.id;
-      var postDeleted = await PostModel.deleteOne({_id:postId});
-      await CommentModel.deleteMany({_id: {$in: postDeleted.comment}});
-      if(postDeleted.deletedCount==1){
+      var commentId = req.params.id;
+     
+      var commentDeleted = await CommentModel.deleteOne({_id:commentId});
+      if(commentDeleted.deletedCount==1){
         return res.status(200).json({
           success: true,
           message: "Data deleted successfully.",
-          data: postDeleted
+          data: commentDeleted
           });
       }else{
         return res.status(422).json({
@@ -129,11 +130,6 @@ const destroy = async (req, res, next) => {
           });
       }
     }
-    return res.status(200).json({
-      success: true,
-      message: "Data deleted successfully.",
-      data: []
-    });
   } catch (error) {
     return res.status(500).json({
       success: false,

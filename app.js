@@ -1,19 +1,17 @@
+require("dotenv").config();
 const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes');
 var bodyParser = require('body-parser');
-
+const { MONGO_URI,SERVER_PORT } = process.env;
 const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json()); 
-
 app.use(routes);
 
-
-
-const mongoDB = 'mongodb://127.0.0.1/newtest_db';
+const mongoDB = MONGO_URI;
 mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
 //Get the default connection
 const db = mongoose.connection;
@@ -60,7 +58,7 @@ app.get('/json-data', async(req, res) => {
 
 const server = http.createServer(app);
 server
-  .listen(3000)
+  .listen(SERVER_PORT)
   .on("listening", () => {
     console.log(`Server is running on port ${server.address().port}`);
   })

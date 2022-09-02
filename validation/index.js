@@ -1,4 +1,5 @@
 module.exports = {
     postValidation: require('./postValidation'),
-    userValidation: require('./userValidation')
+    userValidation: require('./userValidation'),
+    loginValidation: require('./loginValidation')
 }
